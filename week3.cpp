@@ -352,3 +352,94 @@ void print(const char* filename){
     
     
 }
+
+int const MAX_SIZE_NAME = 25;
+struct Job_Offer {
+    char name[MAX_SIZE_NAME];
+    int number_of_programmers;
+    int  days_off_count;
+    long long earned_money;
+};
+Job_Offer create_offer() {
+    Job_Offer offer;
+    std::cout << "Name: ";
+    std::cin.ignore();
+    std::cin.getline(offer.name, MAX_SIZE_NAME);
+
+    std::cout << "Number of programmers: ";
+    std::cin >> offer.number_of_programmers;
+
+    std::cout << "Days off: ";
+    std::cin >> offer.days_off_count;
+
+    std::cout << "Money: ";
+    std::cin >> offer.earned_money;
+
+    return offer;
+}
+
+void n_offers(std::ofstream& file) {
+    int n;
+    std::cin >> n;
+    file.open("m.bin",std::ios::out| std::ios::binary|std::ios::app);
+    //std::ofstream file(filename, std::ios::binary);
+    file.seekp(0, std::ios::end);
+   // std::cout<<file.tellp()<<' ';
+    if (!file.is_open()) {
+        return;
+    }
+  //  file.seekp(0, std::ios::end);
+//    std::cout<<file.tellp()<<'\n';
+    if (n < 0) {
+        return;
+    }
+    for (int i = 0;i < n;i++) {
+        Job_Offer offer;
+        offer = create_offer();
+        file.write((const char*)&offer, sizeof(Job_Offer));
+
+    }
+    file.close();
+}
+
+void filterOffers(const char* filePath, long long minSalary){
+    std::ifstream file(filePath, std::ios::out | std::ios::binary);
+    if(!file){
+        return;
+    }
+    Job_Offer offer;
+    while(file.read((char*)&offer,sizeof(Job_Offer))){
+        if(offer.earned_money > minSalary){
+            std::cout<<offer.name<<'\n';
+        }
+    } 
+    file.close();
+}
+bool are_the_same_names(char* name, const char* name_firm){
+    if(name == nullptr || name_firm == nullptr){
+        return 0;
+    }
+    while((*name) || (*name_firm)){
+        if((*name) != (*name_firm)){
+            return 0;
+        }
+        name++;
+        name_firm++;
+    }
+    return 1;
+}
+bool existOffer(const char* filePath, const char* name){
+    std::ifstream file(filePath, std::ios::in|std::ios::binary);
+    if(!file){
+        return 0;
+    }
+    Job_Offer offer;
+    while(file.read((char*)&offer, sizeof(Job_Offer))){
+        if(are_the_same_names(offer.name, name)){
+            file.close();
+            return 1;
+        }
+    }
+    file.close();
+    return 0;
+}
