@@ -2,18 +2,47 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 struct Block{
     int16_t next;
     int16_t textlen;
     char symbol;
 };
 
-void print_sentence(std::ifstream& ifs){
-if(!ifs){
-      return;
-  }
+
+int count_blocks(std::ifstream& ifs){
+   
+   if(!ifs){
+       
+      return 0;
+   }
   
   int curidx = 0;
+  int count = 0;
+  while(true){
+      
+      Block b;
+      count++;
+       ifs.seekg(curidx * sizeof(Block), std::ios::beg);
+       ifs.read((char*)&b, sizeof(Block));
+       if(b.next == -1){
+           break;
+       }
+       curidx = b.next;
+       
+  }
+  ifs.close();
+  return count;
+    
+}
+void print_sentence(std::ifstream& ifs, std::stringstream& ss, Block* blocks){
+if(!ifs){
+    
+      return;
+  }
+  ifs.seekg(0, std::ios::beg);
+  int curidx = 0;
+  int i =0;
   while(true){
       Block b;
        ifs.seekg(curidx * sizeof(Block), std::ios::beg);
@@ -21,9 +50,15 @@ if(!ifs){
        if(b.next == -1){
            break;
        }
+       blocks[i] = b;
        curidx = b.next;
-       std::cout<<b.symbol;
+       i++;
+       //ss<<b.symbol;
   }
+  for(int j = 0;j<i;j++){
+      ss << blocks[j].symbol;
+  }
+  std::cout<<ss.str().c_str();
   ifs.close();
     
 }
@@ -53,8 +88,16 @@ int main()
   file.close();
   
   std::ifstream ifs("blocks.bin", std::ios::binary);
-  print_sentence(ifs);
+  std::stringstream ss("");
+ int count = count_blocks(ifs);
+ std::cout<<count;
+  ifs.close();
   
+ Block* blocks = new Block[count];
+ std::ifstream ifs1("blocks.bin", std::ios::binary);
+  print_sentence(ifs1, ss, blocks);
+  ifs1.close();
+  delete[] blocks;
   return 0;
 
     
