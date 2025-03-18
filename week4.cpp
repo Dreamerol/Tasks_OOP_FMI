@@ -4,9 +4,71 @@
 #include <fstream>
 #include <sstream>
 //zad1
-class Teacher{
+constexpr int MAX_AGE = 70;
+constexpr int MIN_AGE = 18;
+constexpr int LEN = 100;
+enum class Subject {
+    Default,
+    Math,
+    BG,
+    Geometry,
+};
+class Teacher {
+    char name[LEN]="";
+    int age=18;
+    double salary=0;
+    Subject subject = Subject::Default;
 
-}
+    Teacher() {}
+    
+    int getAge() const{
+        return age;
+    }
+    void setAge(int value) {
+        if (value < MIN_AGE || value > MAX_AGE) {
+            return;
+        }
+        else {
+            age = value;
+        }
+    }
+ 
+    const char* getName() const{
+        return name;
+    }
+    void setName(const char* new_name) {
+        if (new_name == nullptr) {
+            return;
+        }
+        if (strlen(new_name) > LEN) {
+            return;
+        }
+        strcpy(name, new_name);
+    }
+    
+    int getSalary() const {
+        return salary;
+    }
+    void setSalary(double value) {
+        if (value < 500) {
+            return;
+        }
+        else {
+            salary = value;
+        }
+    }
+    
+
+    Subject getSubject(Subject subject) {
+        return subject;
+    }
+
+    void setSubject(Subject subject) {
+        this->subject = subject;
+    }
+
+};
+
 //zad2
 constexpr int MAX_SIZE = 1024 + 1;
 bool points_validator(int points){
