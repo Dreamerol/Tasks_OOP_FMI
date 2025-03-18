@@ -3,6 +3,201 @@
 #include <cstring>
 #include <fstream>
 #include <sstream>
+//zad1
+class Teacher{
+
+}
+//zad2
+constexpr int MAX_SIZE = 1024 + 1;
+bool points_validator(int points){
+    if(points < 0){
+        return 0;
+    }
+    return 1;
+}
+bool string_validator(char* text){
+    if(strlen(text) > MAX_SIZE){
+        return 0;
+    }
+    return 1;
+}
+class Task{
+    char task_description[MAX_SIZE]{'\0'};
+    char right_answer;
+    int points;
+    char password[MAX_SIZE]{'\0'};
+    
+    public:
+    
+    Task() = default;
+    Task(char text_description[], char right_answer, int points, char password[]){
+        
+        if(points_validator(points))
+        {
+        this->points = points;
+            
+        }
+        else{
+           this->points = 0; 
+        }
+        if(string_validator(text_description)){
+            strcpy(this->task_description, task_description);
+        }
+        
+        if(string_validator(password)){
+            strcpy(this->password, password);
+        }
+        
+        this->right_answer = right_answer;
+        
+        
+    }
+    int getPoints() const{
+        return points;
+    }
+    
+    char getRightAnswer() const{
+        return right_answer;
+    }
+    
+    const char* getTaskDescription() const{
+        return task_description;
+    }
+    bool is_the_same_password(char* word1, char* word2){
+        if(word1 == nullptr || word2 == nullptr){
+            return 0;
+        }
+        while((*word1)||(*word2)){
+            if((*word1) !=(*word2)){
+                return 0;
+            }
+            word1++;
+            word2++;
+        }
+        return 1;
+        
+    }
+    bool RightPassword(){
+       char password[MAX_SIZE];
+       std::cout<<"Write password!: ";
+       //std::cin.ignore();
+       
+       std::cin.getline(password, MAX_SIZE);
+      
+       if(!is_the_same_password(password, this->password)){
+           
+           return 0;
+       }
+       
+       return 1;
+    }
+    void setPoints(int points){
+        if(points <= 0){
+            std::cout<<"Not a valid value for the points!";
+            return;
+        }
+        if(RightPassword()){
+        this->points = points;
+            
+        }
+    }
+    
+    void setPassword(char* new_password){
+        if(new_password == nullptr){
+            return;
+        }
+        if(strlen(password) < strlen(new_password)){
+            return;
+        }
+        if(RightPassword()){
+        strcpy(password, new_password);
+        }
+    }
+    
+    void setTaskDescription(char* new_task_description){
+       if(RightPassword()){
+       strcpy(task_description, new_task_description);
+    }}
+    void setRightAnswer(char answer){
+        if(RightPassword()){
+        right_answer = answer;
+    }}
+};
+
+
+class Test{
+  Task* tasks=nullptr;
+  int number_tasks=0;
+  
+  public:
+  Test(){
+      
+  };
+  Test(int number){
+      if(number < 0){
+          this->number_tasks = 0;
+      }
+      this->number_tasks = number;
+  }
+  int getNumberTasks() const{
+      return number_tasks;
+  }
+  int number_of_tasks(const char* filename){
+      std::ifstream file;
+      file.open(filename, std::ios::binary);
+      if(!file){
+          return 0;
+      }
+      int count = 0;
+      Task task;
+      while(file.read((char*)&task, sizeof(Task))){
+          count++;
+      }
+      file.close();
+      return count;
+  }
+  void readTasks(const char* filename){
+      std::ifstream file;
+      file.open(filename, std::ios::binary);
+      if(!file){
+          return;
+      }
+      int i = 0;
+      this->number_tasks = number_of_tasks(filename);
+      
+      this->tasks = new Task[number_tasks];
+      while(file.read((char*)&tasks[i], sizeof(Task))){
+          i++;
+      }
+      for(int i = 0;i<number_tasks;i++){
+          std::cout<<tasks[i].getPoints()<<' ';
+      }
+      file.close();
+      
+      
+  }
+  
+  void write_in_binary_file(const char* filename){
+      std::ofstream file;
+      file.open(filename, std::ios::binary);
+      for(int i = 0;i<this->number_tasks;i++){
+          file.write((const char*)&this->tasks[i], sizeof(Task));
+      }
+      file.close();
+  }
+  int all_points(){
+      int points_count = 0;
+      for(int i = 0;i<this->number_tasks;i++){
+          points_count += tasks[i].getPoints();
+      }
+      return points_count;
+  }
+  
+  ~Test(){
+      delete[] tasks;
+  }
+};
+
 //zad3
 constexpr int MAX_SIZE = 64;
 constexpr int MAX_LEN = 1024 + 1;
