@@ -225,6 +225,180 @@ public:
     }
 
 };
+
+//zad 2
+
+constexpr double EPSILON = 1e-10;
+double abs(double num){
+    if(num < 0){
+        return -num;
+    }
+    else{
+        return num;
+    }
+}
+class NumberSeries{
+    double a_0=0;
+    double(*predicate)(double)=nullptr;
+    double* nums=nullptr;
+    int count=1;
+    
+    public:
+
+    NumberSeries():a_0(0), predicate(nullptr), nums(nullptr), count(0){};
+    NumberSeries(double a_0,double(*predicate)(double)){
+        this->a_0=a_0;
+        this->predicate=predicate;
+        this->nums = new double[1];
+        nums[0] = a_0;
+        this->count = 1;
+    }
+    
+    
+    void copyFrom(const NumberSeries& other){
+        this->a_0 =other.a_0;
+        this->predicate = other.predicate;
+        if(this->nums != nullptr){
+            delete[] this->nums;
+        }
+        this->nums = new double[other.count];
+        for(int i=0;i<other.count;i++){
+            this->nums[i] = other.nums[i];
+        }
+        this->count = other.count;
+    }
+    NumberSeries(const NumberSeries& other){
+        copyFrom(other);
+    }
+    NumberSeries& operator=(const NumberSeries& other){
+        if(this != &other){
+            free();
+            copyFrom(other);
+        }
+        return *this;
+    }
+    void free(){
+        if(nums == nullptr){
+            return;
+        }
+        this->predicate = nullptr;
+        this->count = 0;
+        this->nums = nullptr;
+        delete[] nums;
+    }
+    
+    ~NumberSeries(){
+        free();
+    }
+    int getCount() const{
+        return count;
+    }
+    double getA_0() const{
+        return a_0;
+    }
+    void setA_0(double a_0){
+        this->a_0 = a_0;
+    }
+    void setPredicate(double(*predicate)(double)){
+        this->predicate = predicate;
+    }
+    
+    
+    double i_number(int i){
+        if(i <=count){
+            return nums[i];
+        } 
+        double* helper = new double[count];
+        for(int i = 0;i<count;i++){
+            helper[i] = nums[i];
+        }
+        delete[] nums;
+        nums = new double[i+1];
+        for(int i = 0;i<count;i++){
+            nums[i] = helper[i];
+        }
+        delete[] helper;
+        double a_helper = nums[count-1];
+        double num=0;
+        for(int j = 0;j<i;j++){
+             num = predicate(a_helper);
+            a_helper = num;
+            nums[j+count] = num;
+            
+        }
+        count = i+1;
+        return num;
+    }
+    bool isDecreasing(){
+        for(int  i = 0;i<count-1;i++){
+            if(nums[i] < nums[i+1]){
+                return 0;
+            }
+        }
+        return 1;
+    }
+    bool isIncreasing(){
+        
+     for(int i = 0;i<count-1;i++){
+            if(nums[i] > nums[i+1]){
+                return 0;
+            }
+        }
+        return 1;
+    }
+    double find_lim(){
+    double a_helper = nums[count-1];
+       double lim = 0;
+        while(true){
+        lim = predicate(a_helper);
+       
+            if(abs(a_helper-lim)<EPSILON){
+                return lim;
+            }
+            a_helper = lim;
+        }
+        
+    }
+    bool number_in_series(double number){
+        if(number > a_0 && isDecreasing()){
+            return 0;
+        }
+        else if(number < find_lim() && isDecreasing()){
+            return 0;
+        }
+        else if(number < a_0 && isIncreasing()){
+            return 0;
+        }
+        else if(number > find_lim() && isIncreasing()){
+            return 0;
+        }
+        for(int i = 0;i<count;i++){
+            if(abs(nums[i] - number)<EPSILON){
+                return 1;
+            }
+        }
+        double a_helper = nums[count-1];
+        while(true){
+            double num = predicate(a_helper);
+            a_helper = num;
+            if(abs(num - number)<EPSILON){
+                return 1;
+            }
+        }
+        return 0;
+    }
+    void print(){
+        for(int i = 0;i<count;i++){
+            std::cout<<nums[i]<<' ';
+        }
+    }
+    
+};
+double g(double a){
+    return a/2 + 1;
+}
+
+
 int main()
 {
     
@@ -239,4 +413,13 @@ int main()
  //  std::cout<<s.count_of_waffle("moreni");
     //std::cout << "Hello World!\n";
   //  std::cout<<same_words("kiki", "kiki");
+
+    double a_0 = 7;
+    NumberSeries n(a_0, g);
+   // std::cout<<n.i_number(5);
+ // n.i_number(10);
+    // NumberSeries n(a_0, g);
+//  n.print();
+  //std::cout<<n.find_lim();
+std::cout<<n.number_in_series(10101);
 }
