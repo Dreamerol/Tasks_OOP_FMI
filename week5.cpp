@@ -398,6 +398,469 @@ double g(double a){
     return a/2 + 1;
 }
 
+//zad 3
+
+
+#include <iostream>
+#include <cstring>
+#pragma warning (disable:4996)
+constexpr int MAX_USERS_COUNT = 20;
+constexpr int MAX_PRODUCTS_COUNT = 20;
+constexpr int MAX_PRICES_COUNT = 20;
+enum class State {
+    OK,
+    NegativeBalance,
+    NegativeQuantity,
+    NegativePrice,
+    UserFull,
+    ProductFull,
+    PriceFull,
+    UserNotFound,
+    ProductNotFound,
+    ShortOnMoney,
+    NotEnoughItems,
+    updateQuantity,
+};
+class User{
+    size_t id;
+    char* name;
+    double balance;
+    public:
+    User() : id(0), name(nullptr), balance(0){};
+    User(size_t id, const char* name, double balance){
+        setID(id);
+        setBalance(balance);
+        setName(name);
+    }
+    
+    double getBalance() const{
+        return balance;
+    }
+    size_t getID() const{
+        return id;
+    }
+    const char* getName() const{
+        return name;
+    }
+    void setID(size_t id){
+        if(id < 1){
+            return;
+        }
+        this->id = id;
+    }
+    void setBalance(double balance){
+        if(balance < 1){
+            return;
+        }
+        this->balance = balance;
+    }
+    void setName(const char* name){
+        if(name ==nullptr){
+            return;
+        }
+        if(this->name == name){
+            return;
+        }
+        if(this->name != nullptr){
+            delete[] this->name;
+        }
+        strcpy(this->name, name);
+        
+    }
+    
+    bool hasMoney(double arg){
+        return (balance > arg);
+    }
+    //State
+    void copyFrom(const User &other){
+        this->name = new char[strlen(other.name) + 1];
+        strcpy(this->name, other.name);
+        this->id = other.id;
+        this->balance = other.balance;
+    }
+    void free(){
+        if(this->name == nullptr){
+            return;
+        }
+        delete[] this->name;
+        this->name = nullptr;
+    }
+    User(const User& other){
+        copyFrom(other);
+    }
+    User& operator = (const User& other){
+        if(this != &other){
+            free();
+            copyFrom(other);
+        }
+        return *this;
+    }
+    ~User(){
+        free();
+    }
+    State factor(){
+        if(balance < 0){
+            return State::NegativeBalance;
+        }
+    }
+};
+
+class Product{
+    char* name;
+    size_t ownerId;
+    size_t quantity;
+    size_t productId;
+    public:
+    Product() : name(nullptr), ownerId(0), quantity(0), productId(0){};
+    Product(const char* name, size_t ownerId, size_t quantity, size_t productId){
+        setName(name);
+        setOwnerId(ownerId);
+        setQuantity(quantity);
+        setProductId(productId);
+    }
+     char* getName() const{
+        return name;
+    }
+    // size_t getProductId() const{
+    //     return productId;
+    
+    Product(const Product& other){
+        copyFrom(other);
+    }
+    Product& operator = (const Product& other){
+        if(this !=&other){
+            free();
+            copyFrom(other);
+        }
+        return *this;
+    }
+    size_t getProductId() const{
+        return productId;
+    }
+    size_t getOwnerId() const{
+        return ownerId;
+    }
+    size_t getQuantity() const{
+        return quantity;
+    }
+    State updateQuantity(int amount){
+        if(quantity - amount < 0){
+            return State::NegativeQuantity;
+        }
+        quantity -= amount;
+    }
+    void setOwnerId(size_t ownedId){
+        if(ownedId < 1){
+            return;
+        }
+        this->ownerId = ownerId;
+    }
+    void setQuantity(size_t quantity){
+        
+        this->quantity = quantity;
+    }
+    void setProductId(size_t productId){
+        if(productId < 1){
+            return;
+        }
+        this->productId = productId;
+    }
+    void setName(const char* name){
+        if(name == nullptr){
+            return;
+        }
+        if(this->name == name){
+            return;
+        }
+        if(this->name != nullptr){
+            delete[] this->name;
+        }
+        strcpy(this->name, name);
+        
+        
+    }
+    void copyFrom(const Product& other){
+        this->ownerId = other.ownerId;
+        this->productId = other.productId;
+        this->quantity = other.quantity;
+        this->name = new char[strlen(other.name) + 1];
+        strcpy(this->name, name);
+    }
+    
+    void free(){
+        if(name == nullptr){
+            return;
+        }
+        delete[] name;
+        name =  nullptr;
+    }
+   
+    ~Product(){
+        free();
+    }
+
+};
+
+class Price{
+    size_t productId;
+    double price;
+    
+    public:
+    Price() : productId(0), price(0){};
+    Price(size_t productId, double price){
+        setProductId(productId);
+        setPrice(price);
+    }
+    size_t getId() const{
+        return productId;
+    }
+    double getPrice() const{
+        return price;
+    }
+    void setPrice(double price){
+        if(price < 0){
+            return;
+        }
+        this->price = price;
+    }
+    void setProductId(size_t productId){
+        if(productId == 0){
+            return;
+        }
+        this->productId = productId;
+    }
+    State updatePrice(double amount) {
+        if(price + amount < 0){
+            return State::NegativePrice;
+        }
+        price = price + amount;
+    }
+};
+class UsersDatabase{
+    User users[MAX_USERS_COUNT];
+    size_t size;
+    public:
+    UsersDatabase() : size(0), users(){};
+    size_t getSize() const{
+        return size;
+    }
+    const User* getUsers() const{
+        return users;
+    }
+    State addUser(User user){
+        if(size + 1 > MAX_USERS_COUNT){
+            return State::UserFull;
+        }
+        users[size++] = user;
+    }
+    bool hasEnoughMoney(int id,double money){
+        for(int i = 0;i<size;i++){
+            if(users[i].getID() == id){
+                return (users[i].getBalance() >= money);
+                    
+                
+            }
+        }
+    }
+    bool existUser(int id){
+        for(int i = 0;i<size;i++){
+            if(users[i].getID() == id){
+                return 1;
+                    
+                }
+            }
+        
+        return 0;
+    }
+};
+class ProductsDatabase{
+    Product* products;
+    size_t size;
+    
+    public:
+    ProductsDatabase() : size(0), products(nullptr){};
+    
+    size_t getSize() const{
+        return size;
+    }
+    Product* getProducts() const{
+        return products;
+    }
+    
+    State addProduct(const char* name,int id,int prodID,int quantity){
+      if(size+1 > MAX_PRODUCTS_COUNT) {
+          return State::ProductFull;
+      } 
+      Product product(name, id, prodID, quantity);
+      products[size++] = product;
+    } 
+    size_t itemsOwned(size_t id,size_t productID){
+        for(int i=0;i<size;i++){
+            if(products[i].getOwnerId() == id && products[i].getProductId() == productID){
+                return products[i].getQuantity();
+            }
+        }
+    } 
+    State update(size_t id,size_t productID,size_t quantity_new){
+        for(int i=0;i<size;i++){
+            if(products[i].getOwnerId() == id && products[i].getProductId() == productID){
+                 if(products[i].getQuantity() - quantity_new < 0){
+                     return State::NegativeQuantity;
+                 }
+                 products[i].setQuantity(products[i].getQuantity() - quantity_new);
+                 return State::updateQuantity;
+            }
+        }
+    }
+    bool existProduct(size_t productID){
+        for(int i = 0;i<size;i++){
+            if(products[i].getProductId() == productID){
+                return 1;
+            }
+        }
+        return 0;
+    }
+    
+};
+class PricesDatabase{
+    Price* prices;
+    size_t size;
+    
+    public:
+    PricesDatabase() : size(0), prices(nullptr){};
+    int getSize() const{
+        return size;
+    }
+    
+    State addPrice(Price price){
+        if(size + 1 > MAX_PRICES_COUNT){
+            return State::PriceFull;
+        }
+        prices[size++] = price;
+    }
+    double getPrice(int id){
+        for(int i = 0;i<size;i++){
+            if(prices[i].getId() == id){
+                return prices[i].getPrice();
+            }
+        }
+    }
+    Price* getPrices() const{
+        return prices;
+    }
+    
+};
+
+class SalesSystem{
+    UsersDatabase users;
+    PricesDatabase prices;
+    ProductsDatabase products;
+    
+    public:
+    SalesSystem() : users(), prices(), products(){};
+    void addUserinSystem(User user){
+        users.addUser(user);
+    }
+    State addProductInSystem(Product product){
+        bool flag = false;
+        const User* arr = users.getUsers();
+        for(int i = 0;i<users.getSize();i++){
+            if(arr[i].getID() == product.getOwnerId()){
+                products.addProduct(product.getName(), product.getOwnerId(), product.getProductId(), product.getQuantity());
+                flag = true;
+            }
+        }
+        if(!flag){
+            return State::UserNotFound;
+        }
+        
+    }
+    State addPriceInSystem(Price price){
+        bool flag = false;
+        Product* arr = products.getProducts();
+        for(int i = 0;i<products.getSize();i++){
+            if(arr[i].getProductId() == price.getId()){
+                prices.addPrice(price);
+                flag = true;
+            }
+        }
+        if(!flag){
+            return State::ProductNotFound;
+        }
+        
+    }
+    bool user_in_database(size_t id){
+       const User* arr = users.getUsers();
+        for(int i= 0;i<users.getSize();i++){
+            if(arr[i].getID() == id){
+                return 1;
+            }
+        }
+        return 0;
+    }
+    double getPriceByProductId(size_t productID){
+        for(int i = 0;i<prices.getSize();i++){
+            if(prices.getPrices()[i].getId() == productID){
+                return prices.getPrices()[i].getPrice();
+            }
+        }
+    }
+    Product getProductByProductIdSeller(size_t productID, size_t idFrom){
+        for(int i = 0;i<products.getSize();i++){
+            if(products.getProducts()[i].getProductId() == productID && products.getProducts()[i].getOwnerId()==idFrom){
+                return products.getProducts()[i];
+            }
+        }
+    }
+    Product getProductByProductIdClient(size_t productID, size_t idTo){
+        for(int i = 0;i<products.getSize();i++){
+            if(products.getProducts()[i].getProductId() == productID && products.getProducts()[i].getOwnerId()==idTo){
+                return products.getProducts()[i];
+            }
+        }
+    }
+    State sell(size_t idFrom, size_t idTo, size_t productID, size_t quantity){
+        const Product* arr = products.getProducts();
+        bool flag = false;
+        for(int i = 0;i<products.getSize();i++){
+            if(arr[i].getProductId() == productID){
+                flag = true;
+            }
+        }
+        if(!flag){
+            return State::ProductNotFound;
+        }
+        
+        Product product_seller = getProductByProductIdSeller(productID, idFrom);
+        Product product_client = getProductByProductIdClient(productID, idTo);
+       
+            
+            if(!user_in_database(idFrom)){
+                return State::UserNotFound;
+            }
+            else if(!user_in_database(idTo)){
+                return State::UserNotFound;
+            }
+            else{
+                User user_seller = users.getUsers()[idFrom];
+                User user_client = users.getUsers()[idTo];
+                if(user_client.getBalance() <= 0){
+                    return State::ShortOnMoney;
+                }
+                else if(quantity> product_seller.getQuantity()){
+                    return State::NotEnoughItems;
+                }
+                product_seller.setQuantity(product_seller.getQuantity() - quantity);
+                product_client.setQuantity(product_client.getQuantity() + quantity);
+                
+                user_seller.setBalance(user_seller.getBalance() + quantity * getPriceByProductId(productID));
+                user_client.setBalance(user_client.getBalance() - quantity * getPriceByProductId(productID));
+            }
+        
+        
+    }
+    
+};
 
 int main()
 {
