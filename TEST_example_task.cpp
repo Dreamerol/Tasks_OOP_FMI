@@ -123,10 +123,10 @@ public:
 		}
 		
 		file.write((const char*)&this->gradesCount, sizeof(int));
-		
-		for(int i = 0; i<this->gradesCount; i++) {
-			file.write((const char*)&this->grades[i], sizeof(int));
-		}
+		file.write((const char*)this->grades, sizeof(int) * this->gradesCount));
+		// for(int i = 0; i<this->gradesCount; i++) {
+		// 	file.write((const char*)&this->grades[i], sizeof(int));
+		// }
 
 
 		file.write((const char*)&this->moto, MAX_LEN);
@@ -142,7 +142,7 @@ public:
 
 
 		char* name = new char[len+1];
-		name[len] = '\0';
+		//name[len] = '\0';
 		file.read((char*)name, sizeof(char) * (len));
         //std::cout<<name;
 		setName(name);
@@ -153,21 +153,21 @@ public:
 		file.read((char*)&count, sizeof(int));
 	//	std::cout<<count<<' ';
 		int* grades=new int[count];
+		file.read((char*)&this->grades, sizeof(int) * count);
 
-		for(int i=0; i<count; i++) {
-			int grade;
-			file.read((char*)&grade, sizeof(int));
-			//std::cout<<grade<<' ';
-			grades[i] = grade;
-		}
-		setGradesCount(count);
+		// for(int i=0; i<count; i++) {
+		// 	int grade;
+		// 	file.read((char*)&grade, sizeof(int));
+		// 	//std::cout<<grade<<' ';
+		// 	grades[i] = grade;
+		// }
+		
+                setGradesCount(count);
 		setGrades(grades);
-
 		file.read((char*)&this->moto, MAX_LEN);
 
 		file.close();
 
-		std::cout<<gradesCount<<' ';
 		for(int i=0; i<gradesCount; i++) {
 			std::cout<<this->grades[i]<<' ';
 		}
