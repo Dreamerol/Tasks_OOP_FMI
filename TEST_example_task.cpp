@@ -116,11 +116,12 @@ public:
 		int len = strlen(this->name);
 		
 		file.write((const char*)&len, sizeof(int));
-		
-		for(int i = 0; i<len; i++) {
-			file.write((const char*)&this->name[i], sizeof(char));
 
-		}
+		file.write((const char*)this->name, sizeof(char) * len);
+		// for(int i = 0; i<len; i++) {
+		// 	file.write((const char*)&this->name[i], sizeof(char));
+
+		// }
 		
 		file.write((const char*)&this->gradesCount, sizeof(int));
 		file.write((const char*)this->grades, sizeof(int) * this->gradesCount));
