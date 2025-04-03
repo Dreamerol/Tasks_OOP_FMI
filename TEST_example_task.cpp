@@ -136,7 +136,8 @@ public:
 	}
 
 	void read_from_binary_file(std::ifstream& file) {
-    
+
+		free();
 		int len;
 		file.read((char*)&len, sizeof(int));
 //		std::cout<<len<<' ';
