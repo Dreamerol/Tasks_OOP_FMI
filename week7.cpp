@@ -523,6 +523,275 @@ int BinaryNumber::getNumber() const{
 const char* BinaryNumber::getNum() const{
         return this->num;
     }
+//zad 4
+
+#pragma once
+class MultiSet{
+    int size;
+    int* multiset;
+    
+    public:
+    MultiSet();
+    MultiSet(int n);
+    MultiSet(const MultiSet& other);
+    MultiSet& operator=(const MultiSet& other);
+    ~MultiSet();
+    int getSize() const;
+    void print() const;
+    void print(const MultiSet& other) const;
+    void addNum(int num);
+    void shifting(int idx);
+    bool isinthere(int num) const;
+    int findIdx(int idx) const;
+    
+    int count(int num) const;
+    void removeNum(int num);
+    int countNum(int num);
+    //void print() const;
+    
+    friend MultiSet intersection(const MultiSet& other1, const MultiSet& other2);
+    friend MultiSet unionSets(const MultiSet& other1, const MultiSet& other2);
+    
+    private:
+    void free();
+    void copyFrom(const MultiSet& other);
+    void resize(int newCap);
+    
+};
+#include <iostream>
+#include "MultiSet.h"
+MultiSet::MultiSet() : multiset(nullptr), size(0){};
+MultiSet::MultiSet(int n){
+    size = n;
+    multiset = new int[n];
+    for(int i = 0;i<n;i++){
+        multiset[i] = i;
+    }
+}
+    MultiSet::MultiSet(const MultiSet& other){
+        copyFrom(other);
+    }
+    MultiSet& MultiSet::operator=(const MultiSet& other){
+        if(this != &other){
+            free();
+            copyFrom(other);
+        }
+        return *this;
+    }
+    MultiSet::~MultiSet(){
+        free();
+    }
+    int MultiSet::count(int num) const{
+        int count = 0;
+        for(int i = 0;i<size;i++){
+            if(multiset[i] == num){
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    bool MultiSet::isinthere(int num) const{
+        for(int i=0;i<size;i++){
+            if(num == multiset[i]){
+                return 1;
+            }
+        }
+        return 0;
+    }
+    bool isinthereprim(int num, int arr[], int size){
+        for(int i=0;i<size;i++){
+            if(num == arr[i]){
+                return 1;
+            }
+        }
+        return 0;
+    }
+    void MultiSet::addNum(int num){
+        if(count(num) >= 3){
+            return;
+        }
+        resize(size+1);
+        multiset[size++] = num;
+    }
+    int MultiSet::findIdx(int num) const{
+        for(int i = 0;i<size;i++){
+            if(num == multiset[i]){
+                return i;
+            }
+        }
+        return -1;
+    }
+    void MultiSet::shifting(int idx){
+        int* helper = new int[size - 1];
+        int l = 0;
+        for(int i = 0;i<size;i++){
+            if(idx == i){
+                continue;
+            }
+            helper[l++] = multiset[i];
+        }
+        delete[] multiset;
+        multiset = helper;
+        size--;
+        
+    }
+    void MultiSet::removeNum(int num){
+        if(!isinthere(num)){
+            return;
+        }
+        int idx = findIdx(num);
+        shifting(idx);
+    }
+        
+  
+    int countels(int arr[], int size, int num){
+        int c = 0;
+        for(int i = 0;i<size;i++){
+            if(num == arr[i]){
+                c++;
+            }
+        }
+        return c;
+    }
+    MultiSet intersection(const MultiSet& other1, const MultiSet& other2){
+        int* uniqueels = new int[other1.size];
+        int len = 0;
+        for(int i = 0;i<other1.size;i++){
+            if(!isinthereprim(other1.multiset[i], uniqueels, len)){
+                uniqueels[len++] = other1.multiset[i];
+            }
+        }
+        
+        int* uniqueels1 = new int[other2.size];
+        int len1 = 0;
+        for(int i = 0;i<other2.size;i++){
+            if(!isinthereprim(other2.multiset[i], uniqueels1, len1)){
+                uniqueels1[len1++] = other2.multiset[i];
+            }
+        }
+        int sizetwo = other1.size > other2.size ? other2.size : other1.size;
+        int* elsintwo  = new int[sizetwo];
+        int l = 0;
+        for(int i=0;i<len;i++){
+            for(int j = 0;j<len1;j++){
+                if(uniqueels[i] == uniqueels1[j]){
+                    elsintwo[l++] = uniqueels1[j];
+                }
+            }
+        }
+        int* counts = new int[l];
+        for(int i = 0;i<l;i++){
+            int count1 = countels(other1.multiset, other1.size, elsintwo[i]);
+            int count2 = countels(other2.multiset, other2.size, elsintwo[i]);
+            counts[i] = count1 > count2 ? count2 : count1;
+        }
+        MultiSet m;
+        int Count = 0;;
+        for(int i = 0;i<l;i++){
+          Count += counts[i];
+        }
+        int k = 0;
+        m.multiset = new int[Count];
+        for(int i = 0;i<l;i++){
+            for(int j=0;j<counts[i];j++){
+                m.multiset[k++] = elsintwo[i];
+            }
+        }
+        m.size = Count;
+        delete[] uniqueels1;
+        delete[] uniqueels;
+        delete[] counts;
+        delete[] elsintwo;
+        
+        return m;
+    }
+    MultiSet unionSets(const MultiSet& other1, const MultiSet& other2){
+        int newsize = other1.size + other2.size;
+        int* nums = new int[newsize];
+        for(int i = 0;i<other1.size;i++){
+            nums[i] = other1.multiset[i];
+        }
+        for(int j = 0;j<other2.size;j++){
+            nums[other1.size+j] = other2.multiset[j];
+        }
+        
+        int* uniqueels2 = new int[newsize];
+        int len2 = 0;
+        for(int i = 0;i<newsize;i++){
+            if(!isinthereprim(nums[i], uniqueels2, len2)){
+                uniqueels2[len2++] = nums[i];
+            }
+        }
+        int* counts = new int[len2];
+        int Count = 0;
+        for(int k = 0;k<len2;k++){
+            int c = countels(nums, newsize, uniqueels2[k]);
+            counts[k] = c >= 3 ? 3 : c; 
+            
+            Count+=counts[k];
+            
+        }
+      
+        int* final = new int[Count];
+        int o = 0;
+        for(int k = 0;k<len2;k++){
+            for(int j = 0;j<counts[k];j++){
+                final[o++] = uniqueels2[k];
+            }
+        }
+        
+        MultiSet m;
+        m.multiset = final;
+        m.size = Count;
+        delete[] uniqueels2;
+        delete[] counts;
+        delete[] nums;
+    
+        return m;
+    }
+    
+
+    void MultiSet::free(){
+        delete[] multiset;
+        multiset = nullptr;
+    }
+    void MultiSet::copyFrom(const MultiSet& other){
+        size = other.size;
+        multiset = new int[size];
+        for(int i = 0;i<size;i++){
+            multiset[i] = other.multiset[i];
+        }
+    }
+    void MultiSet::resize(int newCap){
+        int* helper = new int[newCap];
+        for(int i = 0;i<size;i++){
+            helper[i] = multiset[i];
+        }
+        
+        delete[] multiset;
+        multiset = helper;
+        
+    }
+    void MultiSet::print() const{
+        for(int i = 0;i<size;i++){
+            std::cout<<multiset[i]<<' ';
+        }
+        std::cout<<'\n';
+    }
+    
+    void MultiSet::print(const MultiSet& other) const{
+        for(int i = 0;i<other.size;i++){
+            std::cout<<other.multiset[i]<<' ';
+        }
+        std::cout<<'\n';
+    }
+    
+    int MultiSet::getSize() const{
+        return size;
+    }
+    
+    
 
 int main()
 {
@@ -604,5 +873,37 @@ int main()
     //BinaryNumber b0 = b1;
     //std::cout<<b0.getNumber();
   //  std::cout<<b1.getNumber();
+
+    //zad 4
+      MultiSet m(6);
+    //m.print();
+    m.addNum(8);
+    //m.print();
+    m.addNum(8);
+    m.addNum(8);
+    //m.addNum(8);
+    //std::cout<<m.getSize();
+    //std::cout<<m.count(8);
+    m.addNum(8);
+    m.removeNum(0);
+    m.removeNum(8);
+    m.removeNum(1);
+    m.removeNum(3);
+    m.addNum(4);
+    m.print();
+    
+    MultiSet s(10);
+    s.addNum(8);
+    s.addNum(4);
+    s.print();
+    MultiSet m1;
+  //  unionSets(m,s);
+    m1 = intersection(m, s);
+    m1.print();
+    
+    MultiSet m2 = unionSets(m, s);
+    m2.print();
+  //  m.addNum(8);
+    //m.print();
     return 0;
 }
