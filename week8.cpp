@@ -180,11 +180,14 @@ class AirBnB{
   int findIndex(size_t id) const;
   friend double calculateDistance(int x1, int y1, int x2, int y2);
   void print();
+  void err(size_t id);
   private:
   void copyFrom(const AirBnB& other);
   void free();
     
 };
+
+
 
 
 
@@ -316,12 +319,23 @@ void Accomodation::setName(const char* name){
       }
       return -1;
   }
-  
+  void AirBnB::err(size_t id){
+      if(!isValidId(id)){
+          throw id;
+      }
+  }
   void AirBnB::makeReservationById(size_t id, size_t daysCount){
-         if(!isValidId(id)){
-          throw "INVALID ID";
+      try {
+          err(id);
+      }
+      catch(size_t id){
+          free();
+          std::cerr<<"Invalid id!";
+      }
+        //  if(!isValidId(id)){
+        //   throw "INVALID ID";
              
-         }
+        //  }
          int idx = findIndex(id);
          places[idx].setDaysCount(daysCount);
          places[idx].setIsTaken(true);
@@ -331,10 +345,14 @@ void Accomodation::setName(const char* name){
   
   void AirBnB::removeReservationById(size_t id){
       {
-         if(!isValidId(id)){
-           std::cerr<<"INVALID ID";
-             
-         }
+          try {
+          err(id);
+      }
+      catch(size_t id){
+          free();
+          std::cerr<<"Invalid id!";
+      }
+       
          int idx = findIndex(id);
          places[idx].setIsTaken(false);
          
@@ -367,11 +385,18 @@ void Accomodation::setName(const char* name){
       return places[minidx].getLocation();
   }
   void AirBnB::removePlace(size_t id){
-       if(!isValidId(id)){
-           std::cerr<<"INVALID ID";
-          //throw ("INVALID ID");
+      try {
+          err(id);
+      }
+      catch(size_t id){
+          free();
+          std::cerr<<"Invalid id!";
+      }
+    //   if(!isValidId(id)){
+    //       std::cerr<<"INVALID ID";
+    //       //throw ("INVALID ID");
              
-         }
+    //      }
          int idx = findIndex(id);
          Accomodation* newPlaces = new Accomodation[count-1];
          int l = 0;
@@ -408,7 +433,6 @@ void Accomodation::setName(const char* name){
           std::cout<<places[i].getId()<<' ';
       }
   }
-
 
 int main()
 {
