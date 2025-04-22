@@ -310,7 +310,9 @@ void Gallery::filterByIdx(int idx, const char* filter){
 }
 void Gallery::filterAllPictures(const char* filter){
     for(int i = 0;i<count;i++){
+        if(!pictures[i].getIsRemoved()){
         filterPrim(pictures[i], filter);
+	}
     }
 }
 Picture& Gallery::operator[](int idx){
