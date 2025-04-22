@@ -433,7 +433,331 @@ void Accomodation::setName(const char* name){
           std::cout<<places[i].getId()<<' ';
       }
   }
+//zad 3
+#pragma once
+class Computer{
+ int serial_number;
+static size_t currentId;
+ char* brand = nullptr;
+ char* processor = nullptr;
+ int video = 0;
+ int hard_drive = 0;
+ int weight = 0;
+ int battery_life = 0;
+ double price = 0;
+int quantity = 0;
 
+    public:
+    Computer(const char* brand,const char* processor,int video,int hard_drive,int weight,int battery_life,double price,int quantity);
+    Computer();
+    Computer(const Computer& other);
+    Computer& operator=(const Computer& other);
+    ~Computer();
+    size_t getId() const;
+    const char* getBrand() const;
+    int getWeigth() const;
+    int getHardDrive() const;
+    int getBatteryLife() const;
+    double getPrice() const;
+    int getVideo() const;
+    const char* getProcessor() const;
+    int getQuantity() const;
+    
+    void setQuantity(int quantity);
+    void setBrand(const char* brand);
+    void setProcessor(const char* processor);
+    
+    void printComputer() const;
+    
+    
+    private:
+    void free();
+    void copyFrom(const Computer& other);
+
+};
+size_t Computer::currentId = 0;
+
+#pragma once
+class ComputerStore{
+   char* name = nullptr;
+   Computer* computers = nullptr;
+   int size = 0;
+   
+   public:
+   ComputerStore();
+   ComputerStore(const char* name);
+   ComputerStore(const ComputerStore& other);
+   ComputerStore& operator=(const ComputerStore& other);
+   ~ComputerStore();
+   void addComputer(const Computer& other);
+   void print() const;
+   void buyComputer(const char* brand, double money, int quantity);
+   void printFilter() const;
+   
+   private:
+   void free();
+   void copyFrom(const ComputerStore& other);
+    
+};
+
+#pragma once
+class ConsultantUtils{
+    public:
+  bool static isGoodForGaming(const Computer& other);
+  bool static isGoodForTravel(const Computer& other);
+  
+};
+
+
+#include <iostream>
+#include "Computer.h"
+#include "ComputerStore.h"
+#include "ConsultantUtils.h"
+#include <cstring>
+
+void Computer::setBrand(const char* brand){
+    if(brand == nullptr){
+        return;
+    }
+    if(brand == this->brand){
+        return;
+    }
+    delete[] this->brand;
+    this->brand = new char[strlen(brand) + 1];
+    strcpy(this->brand, brand);
+
+}
+    void Computer::setProcessor(const char* processor){
+        if(processor == nullptr){
+        return;
+    }
+    if(processor == this->processor){
+        return;
+    }
+    delete[] this->processor;
+    this->processor = new char[strlen(processor) + 1];
+    strcpy(this->processor, processor);
+    }
+Computer::Computer(const char* brand,const char* processor,int video,int hard_drive,int weight,int battery_life,double price,int quantity)
+{
+    setBrand(brand);
+    setProcessor(processor);
+    this->video=video;
+    this->hard_drive = hard_drive;
+    this->weight = weight;
+    this->battery_life = battery_life;
+    this->price = price;
+    this->quantity = quantity;
+    serial_number = currentId++;
+}
+    Computer::Computer() : serial_number(currentId++){};
+    Computer::Computer(const Computer& other){
+        copyFrom(other);
+    }
+    void Computer::copyFrom(const Computer& other){
+    setBrand(other.brand);
+    setProcessor(other.processor);
+     this->video=other.video;
+    this->hard_drive = other.hard_drive;
+    this->weight = other.weight;
+    this->battery_life = other.battery_life;
+    this->price = other.price;
+    this->quantity = other.quantity;
+    serial_number = currentId++;
+    }
+    
+    Computer& Computer::operator=(const Computer& other){
+        
+        if(this != &other){
+            free();
+            copyFrom(other);
+        }
+        return *this;
+    }
+    
+    Computer::~Computer(){
+        free();
+    }
+    size_t Computer::getId() const{
+        return serial_number;
+    }
+    const char* Computer::getBrand() const{
+        return brand;
+    }
+    int Computer::getVideo() const{
+        return video;
+    }
+    const char* Computer::getProcessor() const{
+        return processor;
+    }
+    int Computer::getWeigth() const{
+        return weight;
+    }
+    int Computer::getHardDrive() const{
+        return hard_drive;
+    }
+    int Computer::getBatteryLife() const{
+        return battery_life;
+    }
+    double Computer::getPrice() const{
+        return price;
+    }
+    int Computer::getQuantity() const{
+        return quantity;
+    }
+    
+    void Computer::setQuantity(int quantity){
+        this->quantity = quantity;
+    }
+    
+    void Computer::free(){
+        delete[] brand;
+        delete[] processor;
+        brand = nullptr;
+        processor = nullptr;
+    }
+    
+    
+      ComputerStore::ComputerStore() = default;
+      ComputerStore::ComputerStore(const char* name)
+      {
+      if(name == nullptr){
+          return;
+      }
+      if(name == this->name){
+          return;
+      }
+      this->name = new char[strlen(name) + 1];
+      strcpy(this->name, name);
+      }
+  ComputerStore::ComputerStore(const ComputerStore& other){
+      copyFrom(other);
+  }
+  ComputerStore& ComputerStore::operator=(const ComputerStore& other){
+      if(this!=&other){
+          free();
+          copyFrom(other);
+      }
+      return *this;
+  }
+  ComputerStore::~ComputerStore(){
+      free();
+  }
+    void ComputerStore::free(){
+        delete[] computers;
+        delete[] name;
+        name = nullptr;
+        computers = nullptr;
+    }
+    void ComputerStore::copyFrom(const ComputerStore& other){
+        if(other.name == nullptr || other.name == name){
+            return;
+        }
+        delete[] name;
+        name = new char[strlen(other.name) + 1];
+        strcpy(name, other.name);
+        if(other.computers == nullptr||computers == other.computers){
+            return;
+        }
+        size = other.size;
+        delete[] computers;
+        computers = new Computer[size];
+        for(int i = 0;i<size;i++){
+            computers[i] = other.computers[i];
+        }
+    }
+  void ComputerStore::addComputer(const Computer& other){
+      Computer* newcomps = new Computer[size+1];
+      for(int i = 0;i<size;i++){
+          newcomps[i] = computers[i];
+      }
+      newcomps[size] = other;
+      delete[] computers;
+      computers = newcomps;
+      size++;
+  }
+   
+  void ComputerStore::print() const{
+     
+      std::cout<<"Computer store "<<this->name<<" has "<<size<<" computers."<<'\n';
+      for(int  i = 0;i<size;i++){
+          computers[i].printComputer();
+      }
+  }
+   void ComputerStore::buyComputer(const char* brand, double money, int quantity){
+       bool flag = false;
+      for(int i = 0;i<size;i++){
+          if(strcmp(brand, computers[i].getBrand()) == 0){
+              flag = true;
+              if(computers[i].getPrice() > money){
+                  throw std::logic_error ("Error");
+                  std::cerr<<"You cant buy!You dont have the money.";
+              }
+              else{
+                  if(quantity > computers[i].getQuantity()){
+                      std::cerr<<"You cant buy this quantity.";
+                      computers[i].setQuantity(0);
+                  }
+                  else{
+                  computers[i].setQuantity(computers[i].getQuantity()- quantity);
+              }
+          }
+      }
+      }
+      if(!flag){
+          std::cerr<<"No brand!";
+      }
+   }
+  
+  void Computer::printComputer() const{
+      std::cout<<brand<<' '<<quantity<<'\n';
+  }
+  void ComputerStore::printFilter() const{
+      std::cout<<"Computers for sale: "<<'\n';
+      for(int i = 0;i<size;i++){
+          if(computers[i].getQuantity() != 0){
+              computers[i].printComputer();
+          }
+      }
+      std::cout<<"Gaming: "<<'\n';
+      for(int i = 0;i<size;i++){
+          if(ConsultantUtils::isGoodForGaming(computers[i])){
+              computers[i].printComputer();
+          }
+      }
+       
+      std::cout<<"Travel: "<<'\n';
+      for(int i = 0;i<size;i++){
+          if(ConsultantUtils::isGoodForTravel(computers[i])){
+              computers[i].printComputer();
+          }
+      }
+  }
+  bool ConsultantUtils::isGoodForGaming(const Computer& other){
+      if(other.getHardDrive() >= 512){
+          
+          int video = other.getVideo();
+          //std::cout<<other.getVideo();
+          if(video == 3060 || video == 3070 || video == 3080 || video == 3090){
+              
+              if(strcmp("i7", other.getProcessor()) == 0 || strcmp("i5", other.getProcessor())){
+                  return 1;
+              }
+              else{
+                  return 0;
+              }
+          }
+          else{
+             return 0;
+          }
+     }
+      else{
+          return 0;
+      }
+  }
+  bool ConsultantUtils::isGoodForTravel(const Computer& other){
+      return(other.getWeigth() <= 2.5 && other.getBatteryLife() >= 6);
+  }
 int main()
 {
     //zad 1
@@ -471,7 +795,29 @@ Point y1 = b.closestLocation(p8);
 b.makeReservationById(1, 9);
 std::cout<<y1.x<<' '<<y1.y;
 
-    
+    //zad 3
+    Computer c1;
+    Computer c2;
+    Computer c3("lili", "i7", 3060, 512, 2, 9, 5.7, 6);
+    std::cout<<c3.getVideo();
+    ComputerStore s("kjskjs");
+    //s.addComputer(c3);
+   // s.buyComputer("lolo", 1, 90);
+    //std::cout<<c3.getBrand();
+    c3.setBrand("lolo");
+   // std::cout<<c3.getBrand();
+    Computer c4 = c3;
+    s.addComputer(c3);
+    //s.buyComputer("lolo", 90, 1);
+    s.printFilter();
+   // c4.setBrand("looo");
+   // std::cout<<c4.getBrand();
+    //std::cout<<c4.getId();
+    //c3.printComputer();
+   // s.print();
+    // std::cout<<c3.getBrand();
+    // std::cout<<c1.getId()<<c2.getId();
+    // std::cout<<"Hello World";
     return 0;
 }
 
