@@ -14,8 +14,8 @@ public:
 
 	Student(const char* name, const int* grades, int gradesCount, const char* moto) {
 		setName(name);
-		setGrades(grades);
 		setGradesCount(gradesCount);
+		setGrades(grades);
 		setMoto(moto);
 
 	}
