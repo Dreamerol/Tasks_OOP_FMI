@@ -183,6 +183,394 @@ std::ostream& operator<<(std::ostream& os, const String& rhs)
         setPrice(0.8 * price);
     }
 // };
+//zad 2
+#pragma once
+class Carpart{
+  
+  size_t id=0;
+  static int currentId;
+  char* description=nullptr;
+  char* name=nullptr;
+  
+  public:
+  const char* getName() const;
+  const char* getDescription() const;
+  size_t getId() const;
+  
+  void setName(const char* name);
+  void setDescription(const char* description);
+  
+  virtual void print(std::ostream& os) const = 0;
+  Carpart();
+  Carpart(const char* name, const char* description);
+  virtual ~Carpart();
+  Carpart(const Carpart& other);
+  Carpart& operator=(const Carpart& other);
+  
+  private:
+  void free();
+  void copyFrom(const Carpart& other);
+};
+
+int Carpart::currentId = 1;
+std::ostream& operator<<(std::ostream& os, const Carpart& other);
+
+#pragma once
+class Tire : public Carpart{
+    int width=0;
+    int profile=0;
+    int diameter=0;
+    
+    public:
+    Tire();
+    Tire(const char* name,const char* description, int width, int profile, int diameter);
+    void setWidth(int w);
+    void setProfile(int p);
+    void setDiameter(int d);
+    virtual void print(std::ostream& os) const override;
+};
+
+#pragma once
+class Engine : public Carpart{
+  size_t horsepower=0;
+  public:
+  
+  void setHP(int hp);
+  Engine(const char* name, const char* desc, size_t hp);
+  virtual void print(std::ostream& os) const override;
+  
+  
+};
+
+#pragma once
+class Battery : public Carpart{
+  size_t capacity=0;
+  char* batteryId=nullptr;
+  
+  public:
+  Battery();
+  Battery(const char* name, const char* desc, size_t cap, const char* id);
+  void setId(const char* id);
+  Battery(const Battery& other);
+  Battery& operator=(const Battery& other);
+  ~Battery();
+  virtual void print(std::ostream& os) const override;
+  private:
+  void free();
+  void copyFrom(const Battery& other);
+};
+
+#pragma once
+class insufficient_fuel_error : public std::logic_error{
+    public:
+    explicit insufficient_fuel_error(const char* msg);
+    
+};
+class FuelTank{
+    double amount;
+    double capacity;
+    
+    public:
+    double getAmount() const;
+    FuelTank(double capacity);
+    void useFuel(double amount);
+    void fillFuel(double amount);
+    
+    
+};
+#pragma once
+const double RACE_DISTANCE = 0.4;
+class Car{
+
+FuelTank tank;
+Engine engine;
+Tire tires[4];
+Battery battery;
+double distance;
+double weight;
+
+public:
+void setTires(Tire* tires);
+Car(
+Engine& engine,
+Tire* tires,
+Battery& Battery,
+double distance,
+double weight, double capacity);
+
+const FuelTank& getFT() const;
+void drive(double km);
+double getDistance() const;
+};
+
+Car* dragRace(Car* car1, Car* car2);
+
+
+
+#include <iostream>
+#include "CarPart.h"
+#include "Tire.h"
+#include "Engine.h"
+#include "Battery.h"
+#include "FuelTank.h"
+#include "Car.h"
+#include <fstream>
+#include <cstring>
+
+ const char* Carpart::getName() const{
+    return name;
+};
+  const char* Carpart::getDescription() const{
+      return description;
+  }
+  size_t Carpart::getId() const{
+      return id;
+  }
+  
+  void Carpart::setName(const char* name){
+      if(name == nullptr){
+          return;
+      }
+      if(name == this->name){
+          return;
+      }
+      if(this->name != nullptr){
+          delete[] this->name;
+      }
+      this->name = new char[strlen(name) + 1];
+      strcpy(this->name, name);
+  }
+  void Carpart::setDescription(const char* description){
+      if(description == nullptr){
+          return;
+      }
+      if(description == this->description){
+          return;
+      }
+      if(this->description != nullptr){
+          delete[] this->description;
+      }
+      this->description = new char[strlen(description) + 1];
+      strcpy(this->description, description);
+  }
+  
+  Carpart::Carpart() = default;
+  Carpart::Carpart(const char* name, const char* description){
+      id = currentId++;
+      setName(name);
+      setDescription(description);
+  }
+  Carpart::~Carpart(){
+      free();
+  }
+  Carpart::Carpart(const Carpart& other){
+      copyFrom(other);
+  }
+  Carpart& Carpart::operator=(const Carpart& other){
+      if(this!=&other){
+          free();
+          copyFrom(other);
+      }
+      return *this;
+  }
+  
+  
+  void Carpart::free(){
+      delete[] name;
+      delete[] description;
+      name = nullptr;
+      description = nullptr;
+  }
+  void Carpart::copyFrom(const Carpart& other){
+      setName(other.name);
+      setDescription(other.description);
+      id = other.id;
+  }
+  
+std::ostream& operator<<(std::ostream& os, const Carpart& other){
+    other.print(os);
+    return os;
+}
+
+Tire::Tire(const char* name,const char* description, int width, int profile, int diameter): Carpart(name, description) {
+    setWidth(width);
+    setProfile(profile);
+    setDiameter(diameter);
+};
+    void Tire::setWidth(int w){
+        if(w < 155||w > 365){
+            return;
+        }
+        width = w;
+    }
+    void Tire::setProfile(int p){
+        if(p<30 || p > 80){
+            return;
+        }
+        profile = p;
+    }
+    void Tire::setDiameter(int d){
+        if(d < 13 || d > 21){
+            return;
+        }
+        diameter = d;
+    }
+    void Tire::print(std::ostream& os) const{
+        os<<getId()<<" by " <<getName()<< '-'<<getDescription()<<'-'<< width<<'/'<<profile<<'R'<<diameter<<'\n';
+    }
+    
+    void Engine::setHP(int hp){
+        if(hp < 0){
+            return;
+        }
+        horsepower = hp;
+    }
+  Engine::Engine(const char* name, const char* desc, size_t hp):Carpart(name, desc){
+      setHP(hp);
+  }
+   void Engine::print(std::ostream& os) const{
+    os << getId()<< " by " <<getName()<< "-" <<getDescription()<<"-" <<horsepower<< " hp"<<'\n'; 
+   }
+   
+    Battery::Battery() = default;
+  Battery::Battery(const char* name, const char* desc, size_t cap, const char* id): Carpart(name, desc){
+      setId(id);
+      capacity = cap;
+  }
+  void Battery::setId(const char* id){
+      if(id == nullptr){
+          return;
+      }
+      if(id == batteryId){
+          return;
+      }
+      free();
+      batteryId = new char[strlen(id) + 1];
+      strcpy(batteryId, id);
+  }
+  Battery::Battery(const Battery& other) : Carpart(other){
+      copyFrom(other);
+  }
+  Battery& Battery::operator=(const Battery& other){
+      if(this!=&other){
+          Carpart::operator=(other);
+          free();
+          copyFrom(other);
+      }
+      return *this;
+  }
+  Battery::~Battery(){
+      free();
+  }
+   void Battery::print(std::ostream& os) const{
+       os << getId()<< " by" <<getName()<< "-" <<getDescription()<< "–" << capacity <<"Ah"<<'\n';
+   }
+ 
+  void Battery::free(){
+      delete[] this->batteryId;
+      batteryId = nullptr;
+  }
+  void Battery::copyFrom(const Battery& other){ 
+      
+      capacity = other.capacity;
+      if(batteryId != nullptr){
+          free();
+      }
+      batteryId = new char[strlen(other.batteryId)+1];
+      strcpy(batteryId, other.batteryId);
+  }
+  
+    insufficient_fuel_error::insufficient_fuel_error(const char* msg) : std::logic_error(msg){};
+    
+    FuelTank::FuelTank(double capacity) : capacity(capacity), amount(capacity){};
+    void FuelTank::useFuel(double amount){
+        if(amount > this->amount){
+            throw insufficient_fuel_error("Not enough fuel!");
+        }
+        this->amount -= amount;
+    }
+    void FuelTank::fillFuel(double amount){
+        if(amount + this->amount > this->capacity){
+            this->amount = this->capacity;
+        }
+        else{
+        this->amount += amount;
+        }
+    }
+Tire::Tire() = default;
+
+// Car::Car(Engine& engine, Tire* tires, Battery& battery, double distance, double weight, double tankCapacity)
+//     : engine(engine), battery(battery), distance(distance), weight(weight), tank(tankCapacity) {
+//     // Set the tires array by copying the provided tires into the car's tires array
+//     for (int i = 0; i < 4; ++i) {
+//         this->tires[i] = tires[i];
+//     }
+// }
+Car::Car(
+Engine& engine,Tire* tires,Battery& battery,double distance,double weight, double capacity) :  
+engine(engine), battery(battery), 
+distance(distance), 
+weight(weight), tank(capacity)
+{
+    //std::cout<<'l';
+   // setTires(tires);
+    if(tires == nullptr){
+        return;
+    }
+    if(this->tires == tires){
+        return;
+    }
+
+    for(int i = 0;i<4;i++){
+        this->tires[i] = tires[i];
+    }
+}
+// void Car::setTires(Tire* tires){
+   
+// }
+const FuelTank& Car::getFT() const{
+    return tank;
+}
+void Car::drive(double km){
+    try{
+    this->tank.useFuel(km);
+      this->distance += km;  
+    }
+    catch(const insufficient_fuel_error& e){
+        std::cerr<<e.what()<<'\n';
+    }
+}
+
+ double FuelTank::getAmount() const{
+     return amount;
+ }
+bool notEnoughFuelForRace(Car* car){
+    return(car->getFT().getAmount() < RACE_DISTANCE);
+}
+
+Car* dragRace(Car* car1, Car* car2){
+    if(notEnoughFuelForRace(car1) && notEnoughFuelForRace(car2)){
+        return nullptr;
+    }
+    else if(notEnoughFuelForRace(car2)){
+        return car1;
+    }
+    else if(notEnoughFuelForRace(car1)){
+        return car2;
+    }
+    else{
+        if(car1->getFT().getAmount() > car2->getFT().getAmount()){
+            return car1;
+        }
+        else{
+            return car2;
+        }
+    }
+}
+double Car::getDistance() const{
+    return distance;
+}
+
 
 //zad 3
 #pragma once
@@ -628,6 +1016,35 @@ int main()
    std::cout<<t2.getName().c_str();
    
   // t2.print();
+//zad 2
+	    Tire tires[4] = {
+        Tire("BrandA", "All-season", 200, 55, 16),
+        Tire("BrandA", "All-season", 200, 55, 16),
+        Tire("BrandA", "All-season", 200, 55, 16),
+        Tire("BrandA", "All-season", 200, 55, 16)
+    };
+
+    Engine engine("V8", "Turbo", 500);
+    Battery battery("Bosch", "12V", 80, "B123");
+
+
+std::cout << std::endl;
+
+    Car car(engine, tires, battery, 0, 1500, 100); 
+    Car car1(engine, tires, battery, 0, 1500, 7); // 100L tank
+std::cout << std::endl;
+
+    std::cout << "Fuel before drive: "<<car.getFT().getAmount()<<'\n';
+    std::cout << "Distance before drive: " << car.getDistance() << '\n';
+
+    car.drive(8);  // Use 10L
+
+    std::cout << "Fuel after drive: " << car.getFT().getAmount() << '\n';
+    std::cout << "Distance after drive: " << car.getDistance() << '\n';
+    Car* c1 = &car;
+    Car* c2 = &car1;
+ Car* winner = dragRace(c1,c2);
+ std::cout<<winner->getFT().getAmount();
 
 //zad 3
 	  String s1("ksjss");
