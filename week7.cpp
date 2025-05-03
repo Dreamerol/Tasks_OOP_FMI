@@ -523,6 +523,154 @@ int BinaryNumber::getNumber() const{
 const char* BinaryNumber::getNum() const{
         return this->num;
     }
+
+//zad 3
+#include <iostream>
+#include <fstream>
+#include <cstring>
+enum class Genre : char{
+  ROCK = 1 <<0,
+  POP = 1 << 1,
+  HIPHOP = 1 << 2,
+  EDM = 1 << 3,
+  JAZZ = 1 << 4,
+  Default
+};
+Genre toGenre(char el){
+    switch(el){
+        case 'r': return Genre::ROCK;
+        case 'p': return Genre::POP;
+        case 'h':return Genre::HIPHOP;
+        case 'e':return Genre::EDM;
+        case 'j':return Genre::JAZZ;
+        default: return Genre::Default;
+    }
+}
+void Kbit(unsigned char& el,int k){
+        el |= (1 << (k-1));
+        
+    }
+class Song{
+    char* name = nullptr;
+    int duration =0;
+    char genre=0;
+    unsigned char* content = nullptr;
+    int len = 0;
+    
+    public:
+    Song() = default;
+    Song(const Song& other){
+        copyFrom(other);
+    }
+    Song& operator=(const Song& other){
+        if(this!=&other){
+            free();
+            copyFrom(other);
+        }
+        return *this;
+    }
+    ~Song(){
+        free();
+    }
+    void setName(const char* name){
+        if(name == nullptr){
+            return;
+        }
+        if(name == this->name){
+            return;
+        }
+        delete[] this->name;
+        this->name = new char[strlen(name) + 1];
+        strcpy(this->name, name);
+    }
+    
+    void setGenre(const char* genres){
+        for(int i = 0;i<strlen(genres);i++){
+            genre |= (char)toGenre(genres[i]);
+        }
+    }
+    void setDuration(int duration){
+        if(duration < 0){
+            return;
+        }
+        this->duration = duration;
+    }
+    void setContentFromFile(const char* filename){
+        std::ifstream file;
+        
+        file.open(filename, std::ios::binary);
+        if(!file){
+            throw std::runtime_error("Can't open file!");
+        }
+        if(content != nullptr){
+            delete[] this->content;
+        }
+        file.read((char*)&this->len, sizeof(int));
+        content = new unsigned char[this->len];
+        file.read((char*)content, sizeof(char) * this->len);
+        file.close();
+        
+        
+    }
+    
+    const unsigned char* getContent() const{
+        return content;
+    }
+    void changeKbit(int k){
+        int br = k;
+        for(int i = len-1;i>=0;i--){
+            while(br <= 8){
+                Kbit(content[i], br);
+                br+=k;
+            }
+            br-=8;
+            //content[i]
+        }
+    }
+    void mixSongs(const Song& other){
+        int l = len < other.len ? len : other.len;
+        for(int i = 0;i<l;i++){
+            content[i] ^= other.content[i];
+        }
+    }
+    // void setContent(const char* content){
+    //     this->content = new char[strlen(content)]
+    // }
+    void setContentFromMemory(const unsigned char* data, int size) {
+    delete[] content;
+    len = size;
+    content = new unsigned char[len];
+    for(int i = 0;i<len;i++){
+        content[i] = data[i];
+    }
+    //memcpy(content, data, len);
+}
+char getGenre() const{
+    return genre;
+}
+
+    private:
+    void free(){
+        delete[] name;
+        name = nullptr;
+        
+        delete[] content;
+        content = nullptr;
+    }
+    void copyFrom(const Song& other){
+        setDuration(other.duration);
+        genre = other.genre;
+        setName(other.name);
+        len = other.len;
+        this->content = new unsigned char[len];
+        for(int i = 0;i<len;i++){
+            this->content[i] = other.content[i];
+        }
+        
+    }
+};
+
+
 //zad 4
 
 #pragma once
@@ -873,7 +1021,33 @@ int main()
     //BinaryNumber b0 = b1;
     //std::cout<<b0.getNumber();
   //  std::cout<<b1.getNumber();
+//zad 3
+    Song s1, s2;
+    s1.setName("TestSong");
+    s1.setGenre("rphej");
+    std::cout<<(int)s1.getGenre();
+    s1.setDuration(200);
+    
+    // Fake content for testing (no file needed)
+    unsigned char data1[] = {0b01100001, 0b10101010};
+    unsigned char data2[] = {0b01010101};
+    
+    s1.setContentFromMemory(data1, 2);  // you'd need to add this helper
+    // s1.changeKbit(8);
+    // s2.setContentFromMemory(data2, 1);
+    
+    // s1.mixSongs(s2);
+    // const unsigned char* mixed = s1.getContent();
+    // for (int i = 0; i < 2; i++) {
+    //     printf("%02X ", mixed[i]);
+    // }
+    // std::cout << std::endl;
+    // std::cout<<s1.getGenre();
 
+
+    unsigned char el = 'a';
+    Kbit(el, 2);
+    //std::cout<<el;
     //zad 4
       MultiSet m(6);
     //m.print();
