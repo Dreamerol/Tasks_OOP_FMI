@@ -112,6 +112,146 @@ class PC : public Computer{
       std::cout<<"Mousepad, Keyboard, Screen"<<'\n';
   }
 };
+//zad 3
+
+
+#include <iostream>
+#include <cstring>
+enum class Stars{
+  one = 1,
+  two,
+  three,
+  four,
+  five
+};
+class Player{
+    int ID;
+    static int currentID;
+    size_t points;
+    Stars stars;
+    public:
+    Player(){
+        this->stars = Stars::one;
+        this->points = 0;
+        this->ID = currentID++;
+    }
+    Player(int id){
+        this->stars = Stars::one;
+        this->points = 0;
+        this->ID = id;
+    }
+    Player(size_t points, Stars stars){
+        this->points = points;
+        this->stars = stars;
+        this->ID = currentID++;
+    }
+    void setStars(Stars stars){
+        this->stars = stars;
+    }
+    void setPoints(int points){
+        this->points = points;
+    }
+    size_t getPoints() const{
+        return points;
+    }
+    
+    Stars getStars() const{
+        return stars;
+    }
+    
+    void missionCompleted(size_t points){
+        if(points<=0){
+            return;
+        }
+        this->points += points;
+        }
+    virtual bool levelUp(){
+        if(stars == Stars::one && this->points >=256){
+            this->points -= 256;
+            stars = Stars::two;
+            return true;
+        }
+        else if(stars == Stars::two && this->points >=512){
+            this->points -= 512;
+            stars = Stars::three;
+            return true;
+        }
+        else if(stars == Stars::three && this->points >=1024){
+            this->points -= 1024;
+            stars = Stars::four;
+              return true;
+            
+        }
+        else if(stars == Stars::four && this->points >= 2048){
+            this->points -= 2048;
+            stars = Stars::five;
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    virtual ~Player() = default;
+};
+class Guest : public Player{
+    int timeToPlay;
+    public:
+    int getTime() const{
+        return timeToPlay;
+    }
+    Guest(size_t points, size_t timeToPlay) : Player(points, Stars::one), timeToPlay(timeToPlay){};
+    bool levelUp() override{
+        return false;
+    }
+    
+};
+
+class LoggedPlayer : public Player{
+    char password[8];
+    public:
+    void setPassword(const char* password){
+        if(password == nullptr){
+            return;
+        }
+        if(strlen(password) > 8){
+            return;
+        }
+        strcpy(this->password, password);
+    }
+    LoggedPlayer(int ID, const char* password) : Player(ID){
+        setPassword(password);
+    }
+    
+    bool authenticate(const char* input){
+        return (strcmp(password, input) == 0);
+    }
+    
+    
+};
+
+class PremiumPlayer: public Player{
+    public:
+    PremiumPlayer(int ID) : Player(ID){};
+    bool levelUp() override{
+        if(getPoints() >= 256){
+            int s = (int)getStars();
+             if(++s == 6){
+                 return false;
+             }
+
+            setPoints(getPoints() - 256);
+            setStars(Stars(s));
+            return true;
+            
+           
+        }
+        else{
+            return false;
+        }
+        }
+    
+};
+int Player::currentID = 0;
 
 //zad 4
 
@@ -185,6 +325,23 @@ Laptop lap(23, "kjks", 2, 787);
     lap.printType();
     lap.canConnectWith();
   //std::cout<<"Hello World";
+	
+    Player p(70000, Stars::one);
+    Guest g(7872, 23);
+    //std::cout<<g.levelUp()<<" ";
+    //std::cout<<g.getPoints();
+    LoggedPlayer lg(9, "lolol");
+    //std::cout<<lg.authenticate("lolol");
+    lg.missionCompleted(909090);
+    //std::cout<<lg.levelUp();
+    PremiumPlayer pp(78);
+    pp.missionCompleted(1000);
+    p.levelUp();
+     std::cout<<p.getPoints()<<' ';
+    p.levelUp();
+    std::cout<<p.getPoints();
+  //  std::cout<<"Hello World";
+
 	
 Penguin p(78);
 p.visualize();
