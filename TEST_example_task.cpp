@@ -130,7 +130,7 @@ public:
 		// }
 
 
-		file.write((const char*)&this->moto, MAX_LEN);
+		file.write((const char*)this->moto, MAX_LEN);
 
 		file.close();
 	}
@@ -143,19 +143,19 @@ public:
 //		std::cout<<len<<' ';
 
 
-		char* name = new char[len+1];
+		this->name = new char[len+1];
 		//name[len] = '\0';
-		file.read((char*)name, sizeof(char) * (len));
+		file.read((char*)this->name, sizeof(char) * (len));
         //std::cout<<name;
-		setName(name);
+		//setName(name);
 		// // for(int i = 0;i<len;i++){
 		// //     file.write((const char*)&this->name[i], sizeof(char));
 		// // }
 		int count;
 		file.read((char*)&count, sizeof(int));
 	//	std::cout<<count<<' ';
-		int* grades=new int[count];
-		file.read((char*)&this->grades, sizeof(int) * count);
+		this->grades=new int[count];
+		file.read((char*)this->grades, sizeof(int) * count);
 
 		// for(int i=0; i<count; i++) {
 		// 	int grade;
@@ -164,9 +164,9 @@ public:
 		// 	grades[i] = grade;
 		// }
 		
-                setGradesCount(count);
-		setGrades(grades);
-		file.read((char*)&this->moto, MAX_LEN);
+               // setGradesCount(count);
+		//setGrades(grades);
+		file.read((char*)this->moto, MAX_LEN);
 
 		file.close();
 
@@ -259,7 +259,7 @@ public:
   		std::cout<<counter<<' ';
  		students = new Student[counter];
 
-		for(int i = 0; i<2; i++) {
+		for(int i = 0; i<counter; i++) {
 		    
 			students[i].read_from_binary_file(file);
 
